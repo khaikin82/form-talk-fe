@@ -94,7 +94,7 @@ export const ChatbotForm = ({ formId }) => {
         setIsCompleted(true);
         
         // Submit in background (không cần await)
-        submitAnswers(formId, updatedAnswers).then(result => {
+        submitAnswers(formId, updatedAnswers, form).then(result => {
           console.log('Form submitted:', result);
         }).catch(err => {
           console.error('Submit error:', err);
@@ -203,13 +203,13 @@ export const ChatbotForm = ({ formId }) => {
         </div>
       </div>
 
-              {/* Input Area - Messenger style - Hide when completed */}
+      {/* Input Area - Messenger style - Hide when completed */}
       {!isCompleted && (
         <div className="bg-white border-t px-4 py-3">
           <div>
             {/* Multiple Choice Options */}
             {currentQuestion?.type === 'multiple_choice' && currentQuestion.options && (
-              <div className="mb-3 flex flex-wrap gap-2 justify-end">
+              <div className="mb-3 flex flex-wrap gap-2 justify-start">
                 {currentQuestion.options.map((option, idx) => (
                   option && (
                     <button
@@ -225,37 +225,45 @@ export const ChatbotForm = ({ formId }) => {
             )}
 
             {/* Checkbox Options */}
-            {currentQuestion?.type === 'checkbox' && currentQuestion.options && (
-              <div className="mb-3 space-y-2">
-                <div className="flex flex-wrap gap-2 justify-end">
-                  {currentQuestion.options.map((option, idx) => (
-                    option && (
-                      <button
-                        key={idx}
-                        onClick={() => toggleCheckbox(option)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
-                          selectedOptions.includes(option)
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
-                        }`}
-                      >
-                        {selectedOptions.includes(option) && '✓ '}
-                        {option}
-                      </button>
-                    )
-                  ))}
-                </div>
-                {selectedOptions.length > 0 && (
-                  <button
-                    onClick={handleCheckboxSubmit}
-                    className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Send className="w-4 h-4" />
-                    Gửi ({selectedOptions.length} đã chọn)
-                  </button>
-                )}
-              </div>
-            )}
+{currentQuestion?.type === 'checkbox' && currentQuestion.options && (
+  <div className="mb-3 space-y-2">
+
+    {/* Hàng chứa cả options và nút gửi */}
+    <div className="flex justify-between items-start gap-2">
+
+      {/* Options bên trái */}
+      <div className="flex flex-wrap gap-2">
+        {currentQuestion.options.map((option, idx) => (
+          option && (
+            <button
+              key={idx}
+              onClick={() => toggleCheckbox(option)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                selectedOptions.includes(option)
+                  ? 'bg-blue-500 text-white border-blue-500'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+              }`}
+            >
+              {selectedOptions.includes(option) && '✓ '}
+              {option}
+            </button>
+          )
+        ))}
+      </div>
+
+      {/* Nút gửi bên phải */}
+      {selectedOptions.length > 0 && (
+        <button
+          onClick={handleCheckboxSubmit}
+          className="px-8 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-medium transition-colors flex items-center gap-2 h-fit"
+        >
+          <Send className="w-4 h-4" />
+          Gửi ({selectedOptions.length} đã chọn)
+        </button>
+      )}
+    </div>
+  </div>
+)}
 
             {/* Text Input */}
             {currentQuestion?.type === 'short_answer' && (

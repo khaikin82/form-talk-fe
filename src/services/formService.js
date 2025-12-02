@@ -32,24 +32,66 @@ export const formService = {
     return data;
   },
 
-  // Submit form answers (mock for now)
-  submitFormAnswers: async (formId, answers) => {
-    // Mock implementation - store in localStorage
+  // Submit form answers - Format for backend API
+  submitFormAnswers: async (formId, answers, form) => {
     console.log('Submitting answers:', { formId, answers });
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Transform answers to match backend AnswerExtractionInput format
+    const transformedAnswers = answers.map(ans => {
+      console.log('Processing answer:', ans);
+      // Find the corresponding question from form to get all details
+      const question = form.questions.find(q => q.id === ans.questionId);
+      console.log('Matching question for answer:', { ans, question });
+      // Convert answer to rawAnswer string
+      let rawAnswer = '';
+      if (Array.isArray(ans.answer)) {
+        rawAnswer = ans.answer.join(', ');
+      } else {
+        rawAnswer = String(ans.answer);
+      }
+      console.log('Raw answer string:', rawAnswer);
+      return {
+        questionId: ans.questionId,
+        originalQuestion: question?.originalQuestion || ans.question,
+        questionType: ans.type,
+        options: question?.options || [],
+        rawAnswer: rawAnswer,
+      };
+    });
+
+    console.log("Transformed Answers:", transformedAnswers);
+
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.EXTRACT_ANSWERS}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        answers: transformedAnswers,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to submit answers');
+    }
+
+    // Optional: Store in localStorage as backup
+    try {
+      const submissions = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
+      const submission = {
+        formId,
+        answers: transformedAnswers,
+        extractedAnswers: data.answers,
+        submittedAt: new Date().toISOString(),
+      };
+      submissions.push(submission);
+      localStorage.setItem('formSubmissions', JSON.stringify(submissions));
+    } catch (e) {
+      console.warn('Failed to store in localStorage:', e);
+    }
     
-    // Store in localStorage
-    const submissions = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
-    const submission = {
-      formId,
-      answers,
-      submittedAt: new Date().toISOString(),
-    };
-    submissions.push(submission);
-    localStorage.setItem('formSubmissions', JSON.stringify(submissions));
-    
-    return { success: true, submissionId: Date.now().toString() };
+    return data;
   },
 };

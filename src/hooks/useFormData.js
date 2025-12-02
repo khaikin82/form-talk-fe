@@ -16,6 +16,7 @@ export const useFormData = () => {
 
     try {
       const data = await formService.createForm(formUrl);
+      console.log('Created form data:', data);
       return data;
     } catch (err) {
       setError(err.message);
@@ -45,12 +46,12 @@ export const useFormData = () => {
     }
   }, []);
 
-  const submitAnswers = useCallback(async (formId, answers) => {
+  const submitAnswers = useCallback(async (formId, answers, form) => {
     setLoading(true);
     setError('');
 
     try {
-      const data = await formService.submitFormAnswers(formId, answers);
+      const data = await formService.submitFormAnswers(formId, answers, form);
       return data;
     } catch (err) {
       setError(err.message);

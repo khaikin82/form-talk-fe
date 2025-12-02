@@ -7,10 +7,10 @@ export const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all ${
+          className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all cursor-pointer ${
             activeTab === tab.id
               ? 'bg-blue-600 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-50'
+              : 'text-slate-600 hover:bg-slate-200'
           }`}
         >
           {tab.icon && <tab.icon className="inline w-5 h-5 mr-2" />}

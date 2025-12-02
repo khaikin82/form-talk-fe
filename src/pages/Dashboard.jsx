@@ -34,16 +34,6 @@ export const Dashboard = () => {
 
         {activeTab === 'create' && <CreateForm />}
         {activeTab === 'view' && <ViewForm />}
-
-        <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-          <p className="text-sm text-amber-800">
-            <strong>Lưu ý:</strong> Cập nhật API_BASE_URL trong{' '}
-            <code className="bg-amber-100 px-2 py-1 rounded">
-              src/constants/apiConfig.js
-            </code>{' '}
-            để kết nối với backend
-          </p>
-        </div>
       </div>
     </div>
   );
