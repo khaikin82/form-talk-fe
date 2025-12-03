@@ -275,6 +275,7 @@ export const ChatbotForm = ({ formId }) => {
                           <button
                             key={idx}
                             onClick={() => handleAnswer(option)}
+                            disabled={isValidating}
                             className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full text-sm font-medium transition-colors border border-blue-200"
                           >
                             {option}
@@ -298,6 +299,7 @@ export const ChatbotForm = ({ formId }) => {
                               <button
                                 key={idx}
                                 onClick={() => toggleCheckbox(option)}
+                                disabled={isValidating}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
                                   selectedOptions.includes(option)
                                     ? "bg-blue-500 text-white border-blue-500"
@@ -315,6 +317,7 @@ export const ChatbotForm = ({ formId }) => {
                       {selectedOptions.length > 0 && (
                         <button
                           onClick={handleCheckboxSubmit}
+                          disabled={isValidating}
                           className="px-8 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-medium transition-colors flex items-center gap-2 h-fit"
                         >
                           <Send className="w-4 h-4" />
@@ -359,6 +362,7 @@ export const ChatbotForm = ({ formId }) => {
                           <button
                             key={idx}
                             onClick={() => handleAnswer(option)}
+                            disabled={isValidating}
                             className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full text-sm font-medium transition-colors border border-blue-200"
                           >
                             {option}
@@ -376,11 +380,12 @@ export const ChatbotForm = ({ formId }) => {
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Viết câu trả lời chi tiết..."
                     rows={4}
+                    disabled={isValidating}
                     className="flex-1 resize-none bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
                   />
                   <button
                     onClick={handleSendText}
-                    disabled={!inputValue.trim()}
+                    disabled={!inputValue.trim() || isValidating}
                     className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full text-sm font-medium transition-colors disabled:cursor-not-allowed h-fit"
                   >
                     Gửi
