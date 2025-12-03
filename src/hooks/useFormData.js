@@ -46,6 +46,20 @@ export const useFormData = () => {
     }
   }, [])
 
+  const validateAnswer = useCallback(async (questionData, rawAnswer) => {
+    try {
+      const result = await formService.validateRawAnswer(
+        questionData,
+        rawAnswer
+      )
+      return result
+    } catch (err) {
+      console.error("Validation error:", err)
+      // Return valid by default if API fails
+      return { isValid: true, followUpQuestion: "" }
+    }
+  }, [])
+
   const submitAnswers = useCallback(async (formId, answers, form) => {
     setLoading(true)
     setError("")
@@ -66,6 +80,7 @@ export const useFormData = () => {
     error,
     createForm,
     getForm,
+    validateAnswer,
     submitAnswers,
     setError,
   }

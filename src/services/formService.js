@@ -1,97 +1,134 @@
-import { API_BASE_URL, API_ENDPOINTS } from '../constants/apiConfig';
+import { API_BASE_URL, API_ENDPOINTS } from "../constants/apiConfig"
 
 export const formService = {
   // Create a new talk form
   createForm: async (formURL) => {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_FORM}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ formURL }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.CREATE_FORM}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ formURL }),
+      }
+    )
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to create form');
+      throw new Error(data.error || "Failed to create form")
     }
 
-    return data;
+    return data
   },
 
   // Get form by ID with questions
   getFormById: async (formId) => {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GET_FORM(formId)}`);
-    const data = await response.json();
+    const response = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.GET_FORM(formId)}`
+    )
+    const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to fetch form');
+      throw new Error(data.error || "Failed to fetch form")
     }
 
-    return data;
+    return data
   },
 
   // Submit form answers - Format for backend API
   submitFormAnswers: async (formId, answers, form) => {
-    console.log('Submitting answers:', { formId, answers });
-    
+    console.log("Submitting answers:", { formId, answers })
+
     // Transform answers to match backend AnswerExtractionInput format
-    const transformedAnswers = answers.map(ans => {
-      console.log('Processing answer:', ans);
+    const transformedAnswers = answers.map((ans) => {
+      console.log("Processing answer:", ans)
       // Find the corresponding question from form to get all details
-      const question = form.questions.find(q => q.id === ans.questionId);
-      console.log('Matching question for answer:', { ans, question });
+      const question = form.questions.find((q) => q.id === ans.questionId)
+      console.log("Matching question for answer:", { ans, question })
       // Convert answer to rawAnswer string
-      let rawAnswer = '';
+      let rawAnswer = ""
       if (Array.isArray(ans.answer)) {
-        rawAnswer = ans.answer.join(', ');
+        rawAnswer = ans.answer.join(", ")
       } else {
-        rawAnswer = String(ans.answer);
+        rawAnswer = String(ans.answer)
       }
-      console.log('Raw answer string:', rawAnswer);
+      console.log("Raw answer string:", rawAnswer)
       return {
         questionId: ans.questionId,
         originalQuestion: question?.originalQuestion || ans.question,
         questionType: ans.type,
         options: question?.options || [],
         rawAnswer: rawAnswer,
-      };
-    });
+      }
+    })
 
-    console.log("Transformed Answers:", transformedAnswers);
+    console.log("Transformed Answers:", transformedAnswers)
 
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.EXTRACT_ANSWERS}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        answers: transformedAnswers,
-      }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.EXTRACT_ANSWERS}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          answers: transformedAnswers,
+        }),
+      }
+    )
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to submit answers');
+      throw new Error(data.error || "Failed to submit answers")
     }
 
     // Optional: Store in localStorage as backup
     try {
-      const submissions = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
+      const submissions = JSON.parse(
+        localStorage.getItem("formSubmissions") || "[]"
+      )
       const submission = {
         formId,
         answers: transformedAnswers,
         extractedAnswers: data.answers,
         submittedAt: new Date().toISOString(),
-      };
-      submissions.push(submission);
-      localStorage.setItem('formSubmissions', JSON.stringify(submissions));
+      }
+      submissions.push(submission)
+      localStorage.setItem("formSubmissions", JSON.stringify(submissions))
     } catch (e) {
-      console.warn('Failed to store in localStorage:', e);
+      console.warn("Failed to store in localStorage:", e)
     }
-    
-    return data;
+
+    return data
   },
-};
+
+  validateRawAnswer: async (questionData, rawAnswer) => {
+    const response = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.VALIDATE_ANSWER}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          questionId: questionData.id,
+          originalQuestion: questionData.originalQuestion,
+          questionType: questionData.type,
+          options: questionData.options || [],
+          rawAnswer: rawAnswer,
+        }),
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to validate answer")
+    }
+
+    return data.validationResult // { isValid, followUpQuestion }
+  },
+}

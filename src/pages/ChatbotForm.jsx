@@ -2,7 +2,7 @@
 // src/pages/ChatbotForm.jsx - REPLACE ENTIRE FILE
 // ==========================================
 import React, { useState, useEffect, useRef } from "react"
-import { Send, Loader2, CheckCircle2, Bot, User } from "lucide-react"
+import { Send, Loader2, Bot, User } from "lucide-react"
 import { useFormData } from "../hooks/useFormData"
 
 export const ChatbotForm = ({ formId }) => {
@@ -13,10 +13,10 @@ export const ChatbotForm = ({ formId }) => {
   const [isCompleted, setIsCompleted] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const [selectedOptions, setSelectedOptions] = useState([])
-  const [dropdownValue, setDropdownValue] = useState("")
   const [isLoadingForm, setIsLoadingForm] = useState(true)
+  const [isValidating, setIsValidating] = useState(false)
   const messagesEndRef = useRef(null)
-  const { getForm, submitAnswers } = useFormData()
+  const { getForm, validateAnswer, submitAnswers } = useFormData()
 
   useEffect(() => {
     const loadForm = async () => {
@@ -61,7 +61,31 @@ export const ChatbotForm = ({ formId }) => {
       },
     ])
 
-    // Store answer
+    // Clear inputs
+    setInputValue("")
+    setSelectedOptions([])
+
+    // Validate answer with backend
+    setIsValidating(true)
+    const validation = await validateAnswer(currentQuestion, answerText)
+    setIsValidating(false)
+
+    // If answer is not valid, ask follow-up question
+    if (!validation.isValid && validation.followUpQuestion) {
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: validation.followUpQuestion,
+            isBot: true,
+            timestamp: new Date(),
+          },
+        ])
+      }, 400)
+      return // Don't proceed to next question
+    }
+
+    // Answer is valid - store it
     const newAnswer = {
       questionId: currentQuestion.id,
       question: currentQuestion.originalQuestion,
@@ -71,14 +95,8 @@ export const ChatbotForm = ({ formId }) => {
     const updatedAnswers = [...answers, newAnswer]
     setAnswers(updatedAnswers)
 
-    // Clear inputs
-    setInputValue("")
-    setSelectedOptions([])
-    setDropdownValue("")
-
     // Move to next question or complete
     if (currentQuestionIndex < form.questions.length - 1) {
-      // Show next question immediately
       const nextQuestion = form.questions[currentQuestionIndex + 1]
       setTimeout(() => {
         setMessages((prev) => [
@@ -92,7 +110,7 @@ export const ChatbotForm = ({ formId }) => {
       }, 400)
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
-      // Last question - show success immediately
+      // Last question - show success
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
@@ -104,7 +122,7 @@ export const ChatbotForm = ({ formId }) => {
         ])
         setIsCompleted(true)
 
-        // Submit in background (không cần await)
+        // Submit in background
         submitAnswers(formId, updatedAnswers, form)
           .then((result) => {
             console.log("Form submitted:", result)
@@ -119,12 +137,6 @@ export const ChatbotForm = ({ formId }) => {
   const handleSendText = () => {
     if (inputValue.trim()) {
       handleAnswer(inputValue)
-    }
-  }
-
-  const handleSendDropdown = () => {
-    if (dropdownValue) {
-      handleAnswer(dropdownValue)
     }
   }
 
@@ -161,7 +173,7 @@ export const ChatbotForm = ({ formId }) => {
   }
 
   const currentQuestion = form?.questions[currentQuestionIndex]
-
+  const isInputDisabled = isValidating || isCompleted
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-2xl h-screen md:h-[90vh] md:max-h-[800px] flex flex-col bg-white md:rounded-2xl md:shadow-2xl overflow-hidden">
@@ -186,7 +198,7 @@ export const ChatbotForm = ({ formId }) => {
           )}
         </div>
 
-        {/* Messages Area - Messenger style */}
+        {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50">
           <div className="space-y-3">
             {messages.map((msg, idx) => (
@@ -229,12 +241,28 @@ export const ChatbotForm = ({ formId }) => {
                 )}
               </div>
             ))}
+
+            {/* Validating indicator */}
+            {isValidating && (
+              <div className="flex gap-2 justify-start">
+                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+                <div className="bg-gray-200 text-gray-900 rounded-2xl rounded-tl-none px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm">Đang kiểm tra...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
         </div>
 
         {/* Input Area - Messenger style - Hide when completed */}
-        {!isCompleted && (
+        {!isInputDisabled && (
           <div className="bg-white border-t px-4 py-3">
             <div>
               {/* Multiple Choice Options */}
@@ -304,13 +332,16 @@ export const ChatbotForm = ({ formId }) => {
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendText()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && !isValidating && handleSendText()
+                    }
                     placeholder="Nhập câu trả lời..."
-                    className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
+                    disabled={isValidating}
+                    className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 disabled:opacity-50"
                   />
                   <button
                     onClick={handleSendText}
-                    disabled={!inputValue.trim()}
+                    disabled={!inputValue.trim() || isValidating}
                     className="w-8 h-8 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full flex items-center justify-center transition-colors disabled:cursor-not-allowed"
                   >
                     <Send className="w-4 h-4" />
