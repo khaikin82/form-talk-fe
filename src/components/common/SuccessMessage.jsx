@@ -1,8 +1,8 @@
-import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import React from "react"
+import { CheckCircle2 } from "lucide-react"
 
 export const SuccessMessage = ({ title, data }) => {
-  if (!data) return null;
+  if (!data) return null
 
   return (
     <div className="mt-8 p-6 bg-green-50 border-l-4 border-green-500 rounded-xl">
@@ -17,7 +17,7 @@ export const SuccessMessage = ({ title, data }) => {
                   {key}:
                 </span>
                 <span className="text-green-700 break-all">
-                  {typeof value === 'object'
+                  {typeof value === "object"
                     ? JSON.stringify(value)
                     : String(value)}
                 </span>
@@ -27,5 +27,5 @@ export const SuccessMessage = ({ title, data }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

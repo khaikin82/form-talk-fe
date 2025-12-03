@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react"
 
-export const Input = ({ 
-  label, 
-  value, 
-  onChange, 
-  placeholder, 
-  type = 'text',
-  onKeyPress 
+export const Input = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  onKeyPress,
 }) => {
   return (
     <div className="mb-6">
@@ -24,5 +24,5 @@ export const Input = ({
         onKeyPress={onKeyPress}
       />
     </div>
-  );
-};
+  )
+}
