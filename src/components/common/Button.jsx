@@ -1,5 +1,3 @@
-import React from "react"
-
 export const Button = ({
   children,
   onClick,
@@ -7,6 +5,7 @@ export const Button = ({
   variant = "primary",
   className = "",
   icon: Icon,
+  loading = false, // thêm prop
 }) => {
   const baseStyles =
     "w-full py-4 font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -21,16 +20,10 @@ export const Button = ({
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading} // thường khi loading cũng disable button
       className={`${baseStyles} ${variants[variant]} ${className}`}
     >
-      {Icon && (
-        <Icon
-          className={`w-5 h-5 ${
-            disabled && Icon.displayName === "Loader2" ? "animate-spin" : ""
-          }`}
-        />
-      )}
+      {Icon && <Icon className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />}
       {children}
     </button>
   )

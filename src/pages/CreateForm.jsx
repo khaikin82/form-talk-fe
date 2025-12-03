@@ -40,8 +40,8 @@ export const CreateForm = () => {
       <Button
         onClick={handleCreate}
         disabled={loading}
+        loading={loading}
         icon={loading ? Loader2 : Plus}
-        className="cursor-pointer"
       >
         {loading ? "Đang tạo..." : "Tạo Talk Form"}
       </Button>
