@@ -8,7 +8,7 @@ export const Button = ({
   loading = false, // thêm prop
 }) => {
   const baseStyles =
-    "w-full py-4 font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center gap-2"
+    "w-full py-4 font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl cursor-pointer flex items-center justify-center gap-2"
 
   const variants = {
     primary: "bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white",

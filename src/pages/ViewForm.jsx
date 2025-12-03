@@ -36,7 +36,6 @@ export const ViewForm = () => {
         onClick={handleGetForm}
         disabled={loading}
         icon={loading ? Loader2 : ExternalLink}
-        className="cursor-pointer"
       >
         {loading ? "Đang tải..." : "Xem Form"}
       </Button>
