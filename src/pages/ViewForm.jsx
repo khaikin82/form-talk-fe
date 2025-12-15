@@ -121,7 +121,7 @@ export const ViewForm = ({ onNavigate }) => {
                   </h3>
                   <div className="space-y-1 text-sm text-gray-600">
                     <p>📝 {form.questions?.length || 0} câu hỏi</p>
-                    <p>📅 Tạo lúc: {new Date(form.createdAt || form.created_at).toLocaleDateString("vi-VN")}</p>
+                    <p>📅 Tạo lúc: {new Date(form.createdAt || form.created_at).toLocaleDateString("vi-VN")} {new Date(form.createdAt || form.created_at).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}</p>
                     <p className="font-mono text-xs text-gray-500 mt-2">ID: {form.id}</p>
                   </div>
                 </div>

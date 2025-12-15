@@ -30,7 +30,7 @@ export const Dashboard = ({ onNavigate }) => {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Form Talk</h1>
-            <p className="text-sm text-gray-600">Chào, {user?.username || "Người dùng"}! 👋</p>
+            <p className="text-sm text-gray-600">Chào {user?.firstName || "Người dùng"}! 👋</p>
           </div>
           <button
             onClick={handleLogout}
