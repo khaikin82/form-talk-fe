@@ -2,13 +2,14 @@ import { API_BASE_URL, API_ENDPOINTS } from "../constants/apiConfig"
 
 export const formService = {
   // Create a new talk form
-  createForm: async (formURL) => {
+  createForm: async (formURL, token) => {
     const response = await fetch(
       `${API_BASE_URL}${API_ENDPOINTS.CREATE_FORM}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify({ formURL }),
       }
@@ -130,5 +131,27 @@ export const formService = {
     }
 
     return data.validationResult // { isValid, followUpQuestion }
+  },
+
+  // Get user's forms
+  getMyForms: async (token) => {
+    const response = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.GET_MY_FORMS}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to fetch forms")
+    }
+
+    return data
   },
 }

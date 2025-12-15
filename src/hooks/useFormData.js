@@ -1,9 +1,11 @@
-import { useState, useCallback } from "react" // Thêm useCallback
+import { useState, useCallback } from "react"
 import { formService } from "../services/formService"
+import { useAuth } from "./useAuth"
 
 export const useFormData = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { token } = useAuth()
 
   const createForm = useCallback(async (formUrl) => {
     if (!formUrl.trim()) {
@@ -15,7 +17,7 @@ export const useFormData = () => {
     setError("")
 
     try {
-      const data = await formService.createForm(formUrl)
+      const data = await formService.createForm(formUrl, token)
       console.log("Created form data:", data)
       return data
     } catch (err) {
@@ -24,7 +26,7 @@ export const useFormData = () => {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [token])
 
   const getForm = useCallback(async (formId) => {
     if (!formId.trim()) {
