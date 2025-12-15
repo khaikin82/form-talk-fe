@@ -14,15 +14,12 @@ export const CreateForm = ({ onNavigate }) => {
     const result = await createForm(formUrl)
     console.log("Created form data in handleCreate:", result)
     if (result) {
-      console.log("Setting created form:", result)
       setCreatedForm(result)
-      console.log("Created form set to state:", result)
       setFormUrl("")
     }
   }
 
   const getFormId = () => {
-    console.log("Created form data in getFormId:", createdForm)
     if (!createdForm) return null
     return createdForm.id
   }

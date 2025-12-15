@@ -44,10 +44,8 @@ export const formService = {
 
     // Transform answers to match backend AnswerExtractionInput format
     const transformedAnswers = answers.map((ans) => {
-      console.log("Processing answer:", ans)
       // Find the corresponding question from form to get all details
       const question = form.questions.find((q) => q.id === ans.questionId)
-      console.log("Matching question for answer:", { ans, question })
       // Convert answer to rawAnswer string
       let rawAnswer = ""
       if (Array.isArray(ans.answer)) {
