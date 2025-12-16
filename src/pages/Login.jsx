@@ -1,27 +1,43 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { LogIn, Loader2, AlertCircle } from "lucide-react"
 import { useAuth } from "../hooks/useAuth"
 
-export const Login = ({ onNavigate }) => {
+export const Login = () => {
+  const navigate = useNavigate()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const { login, loading } = useAuth()
+  const [localLoading, setLocalLoading] = useState(false)
+  const { login } = useAuth()
+
+  // Auto-clear error after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("")
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
+    setLocalLoading(true)
 
     if (!username.trim() || !password.trim()) {
       setError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu")
+      setLocalLoading(false)
       return
     }
 
     try {
       await login(username, password)
-      onNavigate("dashboard")
+      navigate("/dashboard")
     } catch (err) {
       setError(err.message || "Đăng nhập thất bại")
+      setLocalLoading(false)
     }
   }
 
@@ -58,7 +74,7 @@ export const Login = ({ onNavigate }) => {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Nhập tên đăng nhập"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loading}
+              disabled={localLoading}
             />
           </div>
 
@@ -73,17 +89,17 @@ export const Login = ({ onNavigate }) => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Nhập mật khẩu"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loading}
+              disabled={localLoading}
             />
           </div>
 
           {/* Login Button */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={localLoading}
             className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-pointer disabled:cursor-not-allowed"
           >
-            {loading ? (
+            {localLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Đang đăng nhập...
@@ -109,7 +125,7 @@ export const Login = ({ onNavigate }) => {
           {/* Register Link */}
           <button
             type="button"
-            onClick={() => onNavigate("register")}
+            onClick={() => navigate("/register")}
             className="w-full py-2 border border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 font-medium rounded-lg transition-colors cursor-pointer"
           >
             Tạo tài khoản mới

@@ -5,7 +5,7 @@ import { Button } from "../components/common/Button"
 import { ShareableLink } from "../components/forms/ShareableLink"
 import { useFormData } from "../hooks/useFormData"
 
-export const CreateForm = ({ onNavigate }) => {
+export const CreateForm = () => {
   const [formUrl, setFormUrl] = useState("")
   const [createdForm, setCreatedForm] = useState(null)
   const { loading, createForm } = useFormData()

@@ -8,7 +8,7 @@ import { useFormData } from "../hooks/useFormData"
 import { useAuth } from "../hooks/useAuth"
 import { formService } from "../services/formService"
 
-export const ViewForm = ({ onNavigate }) => {
+export const ViewForm = () => {
   const [myForms, setMyForms] = useState([])
   const [selectedForm, setSelectedForm] = useState(null)
   const [loading, setLoading] = useState(false)

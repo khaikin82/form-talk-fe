@@ -1,8 +1,10 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useAuth } from "../hooks/useAuth"
 
-export const Register = ({ onNavigate }) => {
+export const Register = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -60,7 +62,7 @@ export const Register = ({ onNavigate }) => {
       
       // Redirect to login after 1.5 seconds
       setTimeout(() => {
-        onNavigate("login")
+        navigate("/login")
       }, 1500)
     } catch (err) {
       setError(err.message || "Đăng ký thất bại")
@@ -212,7 +214,7 @@ export const Register = ({ onNavigate }) => {
           {/* Login Link */}
           <button
             type="button"
-            onClick={() => onNavigate("login")}
+            onClick={() => navigate("/login")}
             className="w-full py-2 border border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 font-medium rounded-lg transition-colors cursor-pointer"
           >
             Đã có tài khoản? Đăng nhập

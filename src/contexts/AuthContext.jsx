@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
 
   // Initialize auth state from localStorage
   useEffect(() => {
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }) => {
     }
     
     setLoading(false)
+    setInitialLoadDone(true)
   }, [])
 
   const register = useCallback(async (username, password, firstName, lastName) => {
@@ -45,8 +47,19 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = useCallback(async (username, password) => {
-    setLoading(true)
-    setError(null)
+    // Only set loading if we're still in initial load
+    // Don't set loading during user login attempts to avoid re-renders
+    if (initialLoadDone) {
+      // Don't change loading state after initial load
+      setError(null)
+      setUser(null)
+      setToken(null)
+    } else {
+      setLoading(true)
+      setError(null)
+      setUser(null)
+      setToken(null)
+    }
     
     try {
       const response = await authService.login(username, password)
@@ -60,11 +73,14 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       const errorMsg = err.message || "Login failed"
       setError(errorMsg)
+      // Keep user and token null on error
       throw err
     } finally {
-      setLoading(false)
+      if (!initialLoadDone) {
+        setLoading(false)
+      }
     }
-  }, [])
+  }, [initialLoadDone])
 
   const logout = useCallback(() => {
     authService.logout()

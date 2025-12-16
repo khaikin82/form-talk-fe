@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Plus, FileText, LogOut } from "lucide-react"
 import { Header } from "../components/layout/Header"
 import { TabNavigation } from "../components/common/TabNavigation"
@@ -8,14 +9,15 @@ import { ViewForm } from "./ViewForm"
 import { useFormData } from "../hooks/useFormData"
 import { useAuth } from "../hooks/useAuth"
 
-export const Dashboard = ({ onNavigate }) => {
+export const Dashboard = () => {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("create")
   const { error } = useFormData()
   const { user, logout } = useAuth()
 
   const handleLogout = () => {
     logout()
-    onNavigate("login")
+    navigate("/login")
   }
 
   const tabs = [
@@ -53,8 +55,8 @@ export const Dashboard = ({ onNavigate }) => {
 
         <ErrorMessage message={error} />
 
-        {activeTab === "create" && <CreateForm onNavigate={onNavigate} />}
-        {activeTab === "view" && <ViewForm onNavigate={onNavigate} />}
+        {activeTab === "create" && <CreateForm />}
+        {activeTab === "view" && <ViewForm />}
       </div>
     </div>
   )

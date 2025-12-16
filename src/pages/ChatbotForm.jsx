@@ -2,10 +2,12 @@
 // src/pages/ChatbotForm.jsx - REPLACE ENTIRE FILE
 // ==========================================
 import React, { useState, useEffect, useRef } from "react"
+import { useParams } from "react-router-dom"
 import { Send, Loader2, Bot, User } from "lucide-react"
 import { useFormData } from "../hooks/useFormData"
 
-export const ChatbotForm = ({ formId }) => {
+export const ChatbotForm = () => {
+  const { formId } = useParams()
   const [form, setForm] = useState(null)
   const [messages, setMessages] = useState([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
