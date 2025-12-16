@@ -81,7 +81,7 @@ export const Login = ({ onNavigate }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 cursor-pointer disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
@@ -110,7 +110,7 @@ export const Login = ({ onNavigate }) => {
           <button
             type="button"
             onClick={() => onNavigate("register")}
-            className="w-full py-2 border border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 font-medium rounded-lg transition-colors"
+            className="w-full py-2 border border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 font-medium rounded-lg transition-colors cursor-pointer"
           >
             Tạo tài khoản mới
           </button>
