@@ -4,7 +4,6 @@ import { ExternalLink, Loader2, Eye, Trash2, Copy, CheckCircle2 } from "lucide-r
 import { FormDetails } from "../components/forms/FormDetails"
 import { ShareableLink } from "../components/forms/ShareableLink"
 import { ErrorMessage } from "../components/common/ErrorMessage"
-import { useFormData } from "../hooks/useFormData"
 import { useAuth } from "../hooks/useAuth"
 import { formService } from "../services/formService"
 
@@ -67,6 +66,56 @@ export const ViewForm = () => {
 
         <ShareableLink formId={selectedForm.id} />
         <FormDetails form={selectedForm} title="Chi tiết Form" />
+
+        {/* Questions List */}
+        {selectedForm.questions && selectedForm.questions.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">
+              Danh sách Chi tiết Câu hỏi ({selectedForm.questions.length} câu):
+            </h3>
+            <ul className="space-y-4">
+              {selectedForm.questions.map((question, index) => (
+                <li
+                  key={question.id || index}
+                  className="p-4 border border-gray-300 rounded-lg bg-white shadow-md"
+                >
+                  <h4 className="text-base font-bold text-indigo-700 mb-2">
+                    {index + 1}.{" "}
+                    {question.naturalQuestion || "Không có câu hỏi tự nhiên"}
+                  </h4>
+
+                  {/* Loại câu hỏi */}
+                  <p className="text-sm text-gray-600 mb-1">
+                    <span className="font-semibold">Loại (Type):</span>
+                    <code className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md ml-1">
+                      {question.type}
+                    </code>
+                  </p>
+
+                  {/* Câu hỏi gốc (OriginalQuestion) */}
+                  <p className="text-sm text-gray-600 mb-1">
+                    <span className="font-semibold">Câu hỏi Gốc:</span>{" "}
+                    {question.originalQuestion || "Không có câu hỏi gốc"}
+                  </p>
+
+                  {/* Các lựa chọn (Options) */}
+                  {question.options && question.options.length > 0 && (
+                    <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                      <p className="font-semibold text-sm mb-1 text-gray-700">
+                        Các Lựa chọn (Options):
+                      </p>
+                      <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5 ml-3">
+                        {question.options.map((option, optIndex) => (
+                          <li key={optIndex}>{option}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     )
   }
