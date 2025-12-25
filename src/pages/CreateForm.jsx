@@ -5,17 +5,26 @@ import { Button } from "../components/common/Button"
 import { ShareableLink } from "../components/forms/ShareableLink"
 import { useFormData } from "../hooks/useFormData"
 
+const FORM_STYLES = [
+  { value: "normal", label: "Bình thường", description: "Phong cách mặc định" },
+  { value: "concise", label: "Súc tích", description: "Ngắn gọn, tập trung" },
+  { value: "detailed", label: "Chi tiết", description: "Đầy đủ, chi tiết" },
+  { value: "friendly", label: "Thân thiện", description: "Nhân tạo, gần gũi" },
+]
+
 export const CreateForm = () => {
   const [formUrl, setFormUrl] = useState("")
+  const [style, setStyle] = useState("normal")
   const [createdForm, setCreatedForm] = useState(null)
   const { loading, createForm } = useFormData()
 
   const handleCreate = async () => {
-    const result = await createForm(formUrl)
+    const result = await createForm(formUrl, style)
     console.log("Created form data in handleCreate:", result)
     if (result) {
       setCreatedForm(result)
       setFormUrl("")
+      setStyle("normal")
     }
   }
 
@@ -33,6 +42,33 @@ export const CreateForm = () => {
         placeholder="https://example.com/form"
         onKeyPress={(e) => e.key === "Enter" && handleCreate()}
       />
+
+      {/* Style Selection */}
+      <div className="mt-6 mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Phong cách Form
+        </label>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {FORM_STYLES.map((styleOption) => (
+            <button
+              key={styleOption.value}
+              onClick={() => setStyle(styleOption.value)}
+              className={`p-3 rounded-lg border-2 transition-all text-center cursor-pointer ${
+                style === styleOption.value
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 bg-white hover:border-gray-400"
+              }`}
+            >
+              <p className="font-medium text-sm text-gray-900">
+                {styleOption.label}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {styleOption.description}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <Button
         onClick={handleCreate}

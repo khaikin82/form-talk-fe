@@ -2,7 +2,7 @@ import { API_BASE_URL, API_ENDPOINTS } from "../constants/apiConfig"
 
 export const formService = {
   // Create a new talk form
-  createForm: async (formURL, token) => {
+  createForm: async (formURL, token, style = "normal") => {
     const response = await fetch(
       `${API_BASE_URL}${API_ENDPOINTS.CREATE_FORM}`,
       {
@@ -11,7 +11,7 @@ export const formService = {
           "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({ formURL }),
+        body: JSON.stringify({ formURL, style }),
       }
     )
 
