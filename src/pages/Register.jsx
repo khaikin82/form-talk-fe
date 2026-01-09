@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { UserPlus, Loader2, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react"
 import { useAuth } from "../hooks/useAuth"
 
 export const Register = () => {
@@ -70,7 +70,7 @@ export const Register = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
@@ -202,7 +202,7 @@ export const Register = () => {
           </button>
 
           {/* Divider */}
-          <div className="relative my-6">
+          <div className="relative my-3">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
@@ -220,6 +220,18 @@ export const Register = () => {
             Đã có tài khoản? Đăng nhập
           </button>
         </form>
+
+        {/* Back to Landing Button */}
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="p-2.5 inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-blue-200 font-medium transition-colors rounded-lg cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại trang chính
+          </button>
+        </div>
       </div>
     </div>
   )

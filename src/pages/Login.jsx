@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { LogIn, Loader2, AlertCircle } from "lucide-react"
+import { LogIn, Loader2, AlertCircle, ArrowLeft } from "lucide-react"
 import { useAuth } from "../hooks/useAuth"
 
 export const Login = () => {
@@ -113,7 +113,7 @@ export const Login = () => {
           </button>
 
           {/* Divider */}
-          <div className="relative my-6">
+          <div className="relative my-3">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
@@ -131,6 +131,18 @@ export const Login = () => {
             Tạo tài khoản mới
           </button>
         </form>
+
+        {/* Back to Landing Button */}
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="p-2.5 inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-blue-200 font-medium rounded-lg transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại trang chính
+          </button>
+        </div>
       </div>
     </div>
   )
