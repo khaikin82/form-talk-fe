@@ -33,14 +33,14 @@ export const ShareableLink = ({ formId }) => {
         />
         <button
           onClick={copyToClipboard}
-          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2"
+          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 cursor-pointer"
         >
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           {copied ? 'Đã copy!' : 'Copy'}
         </button>
         <button
           onClick={openInNewTab}
-          className="px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all"
+          className="px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all cursor-pointer"
         >
           <ExternalLink className="w-4 h-4" />
         </button>
