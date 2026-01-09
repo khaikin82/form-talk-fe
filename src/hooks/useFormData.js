@@ -7,7 +7,8 @@ export const useFormData = () => {
   const [error, setError] = useState("")
   const { token } = useAuth()
 
-  const createForm = useCallback(async (formUrl, style = "normal") => {
+  const createForm = useCallback(async (formUrl, style = "normal", customStyleDesc = "") => {
+    console.log("Creating form with URL:", formUrl, "Style:", style, "Custom Style Desc:", customStyleDesc)
     if (!formUrl.trim()) {
       setError("Please enter a form URL")
       return null
@@ -17,7 +18,8 @@ export const useFormData = () => {
     setError("")
 
     try {
-      const data = await formService.createForm(formUrl, token, style)
+      console.log("Before calling formService.createForm")
+      const data = await formService.createForm(formUrl, token, style, customStyleDesc)
       console.log("Created form data:", data)
       return data
     } catch (err) {

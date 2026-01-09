@@ -10,21 +10,45 @@ const FORM_STYLES = [
   { value: "concise", label: "Súc tích", description: "Ngắn gọn, tập trung" },
   { value: "detailed", label: "Chi tiết", description: "Đầy đủ, chi tiết" },
   { value: "friendly", label: "Thân thiện", description: "Nhân tạo, gần gũi" },
+  { value: "custom", label: "Tùy chỉnh", description: "Phong cách riêng của bạn" },
 ]
 
 export const CreateForm = () => {
   const [formUrl, setFormUrl] = useState("")
   const [style, setStyle] = useState("normal")
+  const [customStyleDesc, setCustomStyleDesc] = useState("")
   const [createdForm, setCreatedForm] = useState(null)
+  const [validationErrors, setValidationErrors] = useState({})
   const { loading, createForm } = useFormData()
 
+  const validateForm = () => {
+    const errors = {}
+
+    if (!formUrl.trim()) {
+      errors.formUrl = "Form URL là bắt buộc"
+    }
+
+    if (style === "custom" && !customStyleDesc.trim()) {
+      errors.customStyleDesc = "Mô tả phong cách là bắt buộc khi chọn phong cách tùy chỉnh"
+    }
+
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleCreate = async () => {
-    const result = await createForm(formUrl, style)
+    if (!validateForm()) {
+      return
+    }
+
+    const result = await createForm(formUrl, style, customStyleDesc)
     console.log("Created form data in handleCreate:", result)
     if (result) {
       setCreatedForm(result)
       setFormUrl("")
       setStyle("normal")
+      setCustomStyleDesc("")
+      setValidationErrors({})
     }
   }
 
@@ -38,17 +62,27 @@ export const CreateForm = () => {
       <Input
         label="Form URL"
         value={formUrl}
-        onChange={(e) => setFormUrl(e.target.value)}
+        onChange={(e) => {
+          setFormUrl(e.target.value)
+          if (validationErrors.formUrl) {
+            setValidationErrors({ ...validationErrors, formUrl: "" })
+          }
+        }}
         placeholder="https://example.com/form"
         onKeyPress={(e) => e.key === "Enter" && handleCreate()}
       />
+      {validationErrors.formUrl && (
+        <p className="text-red-500 text-sm mt-2 mb-4">
+          {validationErrors.formUrl}
+        </p>
+      )}
 
       {/* Style Selection */}
       <div className="mt-6 mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-3">
           Phong cách Form
         </label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {FORM_STYLES.map((styleOption) => (
             <button
               key={styleOption.value}
@@ -68,11 +102,37 @@ export const CreateForm = () => {
             </button>
           ))}
         </div>
+
+        {/* Custom Style Description Input */}
+        {style === "custom" && (
+          <div className="mt-4">
+            <Input
+              label="Mô tả phong cách tùy chỉnh"
+              value={customStyleDesc}
+              onChange={(e) => {
+                setCustomStyleDesc(e.target.value)
+                if (validationErrors.customStyleDesc) {
+                  setValidationErrors({
+                    ...validationErrors,
+                    customStyleDesc: "",
+                  })
+                }
+              }}
+              placeholder="Mô tả phong cách form mà bạn muốn (ví dụ: chuyên nghiệp, vui nhộn, học thuật)"
+              multiline
+            />
+            {validationErrors.customStyleDesc && (
+              <p className="text-red-500 text-sm mt-2">
+                {validationErrors.customStyleDesc}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <Button
         onClick={handleCreate}
-        disabled={loading}
+        disabled={loading || !formUrl.trim() || (style === "custom" && !customStyleDesc.trim())}
         loading={loading}
         icon={loading ? Loader2 : Plus}
       >
