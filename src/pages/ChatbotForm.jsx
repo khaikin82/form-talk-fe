@@ -3,8 +3,9 @@
 // ==========================================
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
-import { Send, Loader2, Bot, User } from "lucide-react"
+import { Send, Loader2, Bot, User, Mic, MicOff } from "lucide-react"
 import { useFormData } from "../hooks/useFormData"
+import { useSpeech } from "../hooks/useSpeech"
 
 export const ChatbotForm = () => {
   const { formId } = useParams()
@@ -19,6 +20,7 @@ export const ChatbotForm = () => {
   const [isValidating, setIsValidating] = useState(false)
   const messagesEndRef = useRef(null)
   const { getForm, validateAnswer, submitAnswers } = useFormData()
+  const { isListening, transcript, startListening, stopListening, clearTranscript, setTranscript } = useSpeech()
 
   useEffect(() => {
     const loadForm = async () => {
@@ -26,7 +28,7 @@ export const ChatbotForm = () => {
       const result = await getForm(formId)
       if (result && result.questions) {
         setForm(result)
-        setMessages([
+        const initialMessages = [
           {
             text: `Chào bạn! 👋 Tôi sẽ hỏi bạn ${result.questions.length} câu hỏi ngắn.`,
             isBot: true,
@@ -37,13 +39,19 @@ export const ChatbotForm = () => {
             isBot: true,
             timestamp: new Date(),
           },
-        ])
+        ]
+        setMessages(initialMessages)
       }
       setIsLoadingForm(false)
     }
 
     loadForm()
   }, [formId, getForm])
+
+  // Phát âm thanh câu hỏi đầu tiên sau khi form load
+  useEffect(() => {
+    // TTS disabled
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -66,6 +74,7 @@ export const ChatbotForm = () => {
     // Clear inputs
     setInputValue("")
     setSelectedOptions([])
+    clearTranscript()
 
     // Validate answer with backend
     setIsValidating(true)
@@ -113,11 +122,12 @@ export const ChatbotForm = () => {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
       // Last question - show success
+      const completionMessage = "🎉 Hoàn thành! Cảm ơn bạn đã tham gia."
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
           {
-            text: "🎉 Hoàn thành! Cảm ơn bạn đã tham gia.",
+            text: completionMessage,
             isBot: true,
             timestamp: new Date(),
           },
@@ -137,8 +147,23 @@ export const ChatbotForm = () => {
   }
 
   const handleSendText = () => {
-    if (inputValue.trim()) {
-      handleAnswer(inputValue)
+    const textToSend = inputValue.trim() || transcript.trim()
+    if (textToSend) {
+      handleAnswer(textToSend)
+    }
+  }
+
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening()
+    } else {
+      startListening()
+    }
+  }
+
+  const handleVoiceSubmit = () => {
+    if (transcript.trim()) {
+      handleAnswer(transcript)
     }
   }
 
@@ -332,25 +357,50 @@ export const ChatbotForm = () => {
 
               {/* Text Input */}
               {currentQuestion?.type === "short_answer" && (
-                <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && !isValidating && handleSendText()
-                    }
-                    placeholder="Nhập câu trả lời..."
-                    disabled={isValidating}
-                    className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 disabled:opacity-50"
-                  />
-                  <button
-                    onClick={handleSendText}
-                    disabled={!inputValue.trim() || isValidating}
-                    className="w-8 h-8 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full flex items-center justify-center transition-colors disabled:cursor-not-allowed"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
+                <div className="space-y-2">
+                  {/* Transcript Display */}
+                  {transcript && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm text-gray-700">
+                      <strong className="text-blue-600">Đã ghi âm (Tiếng Việt):</strong> {transcript}
+                      {isListening && <span className="animate-pulse ml-2">🎤 Đang nghe... (bấm nút mic để dừng)</span>}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+                    <input
+                      type="text"
+                      value={inputValue || transcript}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && !isValidating && handleSendText()
+                      }
+                      placeholder={isListening ? "Đang ghi âm - bấm nút mic để dừng..." : "Nhập hoặc dùng nút mic..."}
+                      disabled={isValidating || isListening}
+                      className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 disabled:opacity-50"
+                    />
+                    
+                    {/* Voice Button */}
+                    <button
+                      onClick={handleVoiceInput}
+                      disabled={isValidating}
+                      className={`p-2 rounded-full transition-colors ${
+                        isListening
+                          ? "bg-red-500 text-white hover:bg-red-600"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      } disabled:opacity-50`}
+                      title={isListening ? "Dừng ghi âm" : "Bắt đầu ghi âm"}
+                    >
+                      {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                    </button>
+                    
+                    <button
+                      onClick={handleSendText}
+                      disabled={(!inputValue.trim() && !transcript.trim()) || isValidating || isListening}
+                      className="w-8 h-8 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full flex items-center justify-center transition-colors disabled:cursor-not-allowed"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -376,22 +426,56 @@ export const ChatbotForm = () => {
 
               {/* Paragraph (long text) */}
               {currentQuestion?.type === "paragraph" && (
-                <div className="flex items-start gap-2 bg-white rounded-xl p-3 border border-gray-200">
-                  <textarea
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Viết câu trả lời chi tiết..."
-                    rows={4}
-                    disabled={isValidating}
-                    className="flex-1 resize-none bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
-                  />
-                  <button
-                    onClick={handleSendText}
-                    disabled={!inputValue.trim() || isValidating}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full text-sm font-medium transition-colors disabled:cursor-not-allowed h-fit"
-                  >
-                    Gửi
-                  </button>
+                <div className="space-y-2">
+                  {/* Transcript Display */}
+                  {transcript && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm text-gray-700">
+                      <strong className="text-blue-600">Đã ghi âm (Tiếng Việt):</strong> {transcript}
+                      {isListening && <span className="animate-pulse ml-2">🎤 Đang nghe... (bấm nút mic để dừng)</span>}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-start gap-2 bg-white rounded-xl p-3 border border-gray-200">
+                    <div className="flex-1 flex flex-col gap-2">
+                      <textarea
+                        value={inputValue || transcript}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder={isListening ? "Đang ghi âm - bấm nút mic để dừng..." : "Viết hoặc dùng nút mic..."}
+                        rows={4}
+                        disabled={isValidating || isListening}
+                        className="flex-1 resize-none bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 disabled:opacity-50"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleVoiceInput}
+                          disabled={isValidating}
+                          className={`px-3 py-2 rounded-full transition-colors text-sm font-medium ${
+                            isListening
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : "bg-blue-500 text-white hover:bg-blue-600"
+                          } disabled:opacity-50 flex items-center gap-2`}
+                          title={isListening ? "Dừng ghi âm" : "Bắt đầu ghi âm"}
+                        >
+                          {isListening ? (
+                            <>
+                              <MicOff size={16} /> Dừng
+                            </>
+                          ) : (
+                            <>
+                              <Mic size={16} /> Ghi âm
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleSendText}
+                      disabled={(!inputValue.trim() && !transcript.trim()) || isValidating || isListening}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full text-sm font-medium transition-colors disabled:cursor-not-allowed h-fit"
+                    >
+                      Gửi
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
