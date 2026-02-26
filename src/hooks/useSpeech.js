@@ -10,6 +10,8 @@ export function useSpeech() {
   const currentUtteranceRef = useRef(null)
   const resultIndexRef = useRef(0) // Track lần cuối đã xử lý để tránh duplicate
   const initializedRef = useRef(false) // Prevent duplicate initialization in strict mode
+  const silenceTimeoutRef = useRef(null) // Track silence detection timeout
+  const lastTranscriptTimeRef = useRef(null) // Track last time transcript was updated
 
   // Khởi tạo STT
   useEffect(() => {
@@ -82,7 +84,19 @@ export function useSpeech() {
         const displayText = final + interim
         if (displayText) {
           setTranscript(displayText)
+          lastTranscriptTimeRef.current = Date.now() // Update last transcript time
         }
+
+        // Reset silence detection timer when we get new speech
+        if (silenceTimeoutRef.current) {
+          clearTimeout(silenceTimeoutRef.current)
+        }
+
+        // Auto-stop after 1.5 seconds of silence (after last speech detected)
+        silenceTimeoutRef.current = setTimeout(() => {
+          console.log('🔇 Silence detected for 1.5s, stopping recording...')
+          sttRef.current?.stop()
+        }, 1500)
 
         // Update resultIndex để lần sau bắt đầu từ đây
         resultIndexRef.current = event.results.length
@@ -96,6 +110,11 @@ export function useSpeech() {
       sttRef.current.stop()
       setIsListening(false)
       resultIndexRef.current = 0
+    }
+    // Clear silence detection timer
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current)
+      silenceTimeoutRef.current = null
     }
   }
 

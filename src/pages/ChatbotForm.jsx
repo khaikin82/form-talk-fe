@@ -1,57 +1,41 @@
-// ==========================================
-// src/pages/ChatbotForm.jsx - REPLACE ENTIRE FILE
-// ==========================================
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
-import { Send, Loader2, Bot, User, Mic, MicOff } from "lucide-react"
+import { Send, Loader2, Bot, User, Mic, MicOff, MessageSquare, ClipboardList } from "lucide-react"
 import { useFormData } from "../hooks/useFormData"
 import { useSpeech } from "../hooks/useSpeech"
+import { ConversationalChatbot } from "./ConversationalChatbot"
 
-export const ChatbotForm = () => {
-  const { formId } = useParams()
-  const [form, setForm] = useState(null)
+// Form Mode Component - hiện form truyền thống
+const FormMode = ({ form, formId }) => {
   const [messages, setMessages] = useState([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState([])
   const [isCompleted, setIsCompleted] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const [selectedOptions, setSelectedOptions] = useState([])
-  const [isLoadingForm, setIsLoadingForm] = useState(true)
   const [isValidating, setIsValidating] = useState(false)
   const messagesEndRef = useRef(null)
-  const { getForm, validateAnswer, submitAnswers } = useFormData()
+  const { validateAnswer, submitAnswers } = useFormData()
   const { isListening, transcript, startListening, stopListening, clearTranscript } = useSpeech()
 
+  // Initialize messages
   useEffect(() => {
-    const loadForm = async () => {
-      setIsLoadingForm(true)
-      const result = await getForm(formId)
-      if (result && result.questions) {
-        setForm(result)
-        const initialMessages = [
-          {
-            text: `Chào bạn! 👋 Tôi sẽ hỏi bạn ${result.questions.length} câu hỏi ngắn.`,
-            isBot: true,
-            timestamp: new Date(),
-          },
-          {
-            text: result.questions[0].naturalQuestion,
-            isBot: true,
-            timestamp: new Date(),
-          },
-        ]
-        setMessages(initialMessages)
-      }
-      setIsLoadingForm(false)
+    if (form?.questions && form.questions.length > 0) {
+      const greetingMessage = `Chào bạn! 👋 Tôi sẽ hỏi bạn ${form.questions.length} câu hỏi ngắn.`
+      setMessages([
+        {
+          text: greetingMessage,
+          isBot: true,
+          timestamp: new Date(),
+        },
+        {
+          text: form.questions[0].naturalQuestion,
+          isBot: true,
+          timestamp: new Date(),
+        },
+      ])
     }
-
-    loadForm()
-  }, [formId, getForm])
-
-  // Phát âm thanh câu hỏi đầu tiên sau khi form load
-  useEffect(() => {
-    // TTS disabled
-  }, [])
+  }, [form])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -61,7 +45,6 @@ export const ChatbotForm = () => {
     const currentQuestion = form.questions[currentQuestionIndex]
     const answerText = Array.isArray(answer) ? answer.join(", ") : answer
 
-    // Add user message
     setMessages((prev) => [
       ...prev,
       {
@@ -71,17 +54,14 @@ export const ChatbotForm = () => {
       },
     ])
 
-    // Clear inputs
     setInputValue("")
     setSelectedOptions([])
     clearTranscript()
 
-    // Validate answer with backend
     setIsValidating(true)
     const validation = await validateAnswer(currentQuestion, answerText)
     setIsValidating(false)
 
-    // If answer is not valid, ask follow-up question
     if (!validation.isValid && validation.followUpQuestion) {
       setTimeout(() => {
         setMessages((prev) => [
@@ -93,10 +73,9 @@ export const ChatbotForm = () => {
           },
         ])
       }, 400)
-      return // Don't proceed to next question
+      return
     }
 
-    // Answer is valid - store it
     const newAnswer = {
       questionId: currentQuestion.id,
       question: currentQuestion.originalQuestion,
@@ -106,7 +85,6 @@ export const ChatbotForm = () => {
     const updatedAnswers = [...answers, newAnswer]
     setAnswers(updatedAnswers)
 
-    // Move to next question or complete
     if (currentQuestionIndex < form.questions.length - 1) {
       const nextQuestion = form.questions[currentQuestionIndex + 1]
       setTimeout(() => {
@@ -121,20 +99,17 @@ export const ChatbotForm = () => {
       }, 400)
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     } else {
-      // Last question - show success
-      const completionMessage = "🎉 Hoàn thành! Cảm ơn bạn đã tham gia."
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
           {
-            text: completionMessage,
+            text: "🎉 Hoàn thành! Cảm ơn bạn đã tham gia.",
             isBot: true,
             timestamp: new Date(),
           },
         ])
         setIsCompleted(true)
 
-        // Submit in background
         submitAnswers(formId, updatedAnswers, form)
           .then((result) => {
             console.log("Form submitted:", result)
@@ -175,26 +150,9 @@ export const ChatbotForm = () => {
     )
   }
 
-  if (isLoadingForm) {
-    return (
-      <div className="h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-      </div>
-    )
-  }
-
-  if (!form) {
-    return (
-      <div className="h-screen bg-white flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-2xl">
-          <p className="text-red-600 font-medium">Không tìm thấy form!</p>
-        </div>
-      </div>
-    )
-  }
-
   const currentQuestion = form?.questions[currentQuestionIndex]
   const isInputDisabled = isValidating || isCompleted
+
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-2xl h-screen md:h-[90vh] md:max-h-[800px] flex flex-col bg-white md:rounded-2xl md:shadow-2xl overflow-hidden">
@@ -230,7 +188,7 @@ export const ChatbotForm = () => {
                 }`}
               >
                 {msg.isBot && (
-                  <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shrink-0 mt-1">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
                 )}
@@ -256,7 +214,7 @@ export const ChatbotForm = () => {
                   </span>
                 </div>
                 {!msg.isBot && (
-                  <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shrink-0 mt-1">
                     <User className="w-4 h-4 text-white" />
                   </div>
                 )}
@@ -266,7 +224,7 @@ export const ChatbotForm = () => {
             {/* Validating indicator */}
             {isValidating && (
               <div className="flex gap-2 justify-start">
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shrink-0 mt-1">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-gray-200 text-gray-900 rounded-2xl rounded-tl-none px-4 py-2">
@@ -462,4 +420,116 @@ export const ChatbotForm = () => {
       </div>
     </div>
   )
+}
+
+// Mode Selector Component
+const ModeSelector = ({ form, onSelectMode }) => {
+  return (
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="max-w-2xl w-full mx-4">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">{form?.title}</h1>
+          <p className="text-gray-600">Chọn cách bạn muốn trải nghiệm</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Option 1: Form Mode */}
+          <button
+            onClick={() => onSelectMode("form")}
+            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all p-8 text-left hover:scale-105 transform"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <ClipboardList className="w-6 h-6 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Form Có Cấu Trúc</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Trả lời các câu hỏi được xếp hàng có cấu trúc rõ ràng. Tốc độ và dễ dùng.
+            </p>
+            <div className="text-sm text-gray-500">
+              ✓ Nhanh chóng
+              <br />✓ Có hướng dẫn
+              <br />✓ Câu hỏi cụ thể
+            </div>
+          </button>
+
+          {/* Option 2: Conversation Mode */}
+          <button
+            onClick={() => onSelectMode("conversation")}
+            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all p-8 text-left hover:scale-105 transform"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-purple-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Chat Tự Do</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Hội thoại tự do với AI. Nói bất cứ điều gì bạn muốn, AI sẽ trả lời.
+            </p>
+            <div className="text-sm text-gray-500">
+              ✓ Linh hoạt
+              <br />✓ Tự nhiên
+              <br />✓ Trả lời bằng voice
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Main Component
+export const ChatbotForm = () => {
+  const { formId } = useParams()
+  const [form, setForm] = useState(null)
+  const [isLoadingForm, setIsLoadingForm] = useState(true)
+  const [chatMode, setChatMode] = useState(null) // null = selector, 'form' = form mode, 'conversation' = conversation
+  const { getForm } = useFormData()
+
+  useEffect(() => {
+    const loadForm = async () => {
+      setIsLoadingForm(true)
+      const result = await getForm(formId)
+      if (result) {
+        setForm(result)
+      }
+      setIsLoadingForm(false)
+    }
+
+    loadForm()
+  }, [formId, getForm])
+
+  if (isLoadingForm) {
+    return (
+      <div className="h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!form) {
+    return (
+      <div className="h-screen bg-white flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-2xl">
+          <p className="text-red-600 font-medium">Không tìm thấy form!</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show mode selector
+  if (chatMode === null) {
+    return <ModeSelector form={form} onSelectMode={setChatMode} />
+  }
+
+  // Show selected mode
+  if (chatMode === "form") {
+    return <FormMode form={form} formId={formId} />
+  }
+
+  if (chatMode === "conversation") {
+    return <ConversationalChatbot formId={formId} />
+  }
 }
