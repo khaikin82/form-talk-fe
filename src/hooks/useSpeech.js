@@ -67,8 +67,8 @@ export function useSpeech() {
         let interim = ''
         let final = ''
 
-        // Chỉ xử lý results từ resultIndex trở đi để tránh duplicate
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        // Xử lý tất cả results từ đầu để hiển thị realtime
+        for (let i = 0; i < event.results.length; i++) {
           const text = event.results[i][0].transcript
 
           if (event.results[i].isFinal) {
@@ -78,26 +78,10 @@ export function useSpeech() {
           }
         }
 
-        // Update cả final và interim
-        if (final) {
-          setTranscript((prev) => {
-            const updated = prev + final
-            return updated
-          })
-        } else if (interim) {
-          // Interim transcript - hiển thị tạm thời nhưng không lưu
-          setTranscript((prev) => {
-            // Nếu prev kết thúc bằng space và interim được add, ta replace interim part
-            const lastSpaceIndex = prev.lastIndexOf(' ')
-            if (lastSpaceIndex >= 0 && !prev.slice(lastSpaceIndex + 1).trim()) {
-              return prev
-            }
-            return prev
-          })
-          // Hiển thị interim riêng
-          if (interim) {
-            console.log('Interim:', interim)
-          }
+        // Hiển thị realtime: final + interim
+        const displayText = final + interim
+        if (displayText) {
+          setTranscript(displayText)
         }
 
         // Update resultIndex để lần sau bắt đầu từ đây

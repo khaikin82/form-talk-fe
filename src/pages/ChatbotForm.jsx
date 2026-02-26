@@ -358,14 +358,6 @@ export const ChatbotForm = () => {
               {/* Text Input */}
               {currentQuestion?.type === "short_answer" && (
                 <div className="space-y-2">
-                  {/* Transcript Display */}
-                  {transcript && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm text-gray-700">
-                      <strong className="text-blue-600">Đã ghi âm (Tiếng Việt):</strong> {transcript}
-                      {isListening && <span className="animate-pulse ml-2">🎤 Đang nghe... (bấm nút mic để dừng)</span>}
-                    </div>
-                  )}
-                  
                   <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
                     <input
                       type="text"
@@ -427,14 +419,6 @@ export const ChatbotForm = () => {
               {/* Paragraph (long text) */}
               {currentQuestion?.type === "paragraph" && (
                 <div className="space-y-2">
-                  {/* Transcript Display */}
-                  {transcript && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm text-gray-700">
-                      <strong className="text-blue-600">Đã ghi âm (Tiếng Việt):</strong> {transcript}
-                      {isListening && <span className="animate-pulse ml-2">🎤 Đang nghe... (bấm nút mic để dừng)</span>}
-                    </div>
-                  )}
-                  
                   <div className="flex items-start gap-2 bg-white rounded-xl p-3 border border-gray-200">
                     <div className="flex-1 flex flex-col gap-2">
                       <textarea
