@@ -7,6 +7,7 @@ import { ChatbotForm } from "./pages/ChatbotForm"
 import { Login } from "./pages/Login"
 import { Register } from "./pages/Register"
 import { Landing } from "./pages/Landing"
+import { GoogleCallback } from "./pages/GoogleCallback"
 import { Loader2 } from "lucide-react"
 
 // Protected Route Component
@@ -80,6 +81,10 @@ function App() {
                 <Register />
               </PublicRoute>
             }
+          />
+          <Route
+            path="/auth/google/callback"
+            element={<GoogleCallback />}
           />
 
           {/* Public Chatbot Form Route (no auth required) */}

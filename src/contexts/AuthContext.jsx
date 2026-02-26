@@ -82,6 +82,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, [initialLoadDone])
 
+  const loginWithGoogle = useCallback(() => {
+    // Redirect to Google login endpoint
+    window.location.href = authService.getGoogleLoginUrl()
+  }, [])
+
+  const handleGoogleCallback = useCallback((userData) => {
+    // This is called after OAuth callback is processed
+    // userData should contain { user, token }
+    if (userData.user && userData.token) {
+      setUser(userData.user)
+      setToken(userData.token)
+      setError(null)
+    }
+  }, [])
+
   const logout = useCallback(() => {
     authService.logout()
     setUser(null)
@@ -97,6 +112,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user && !!token,
     register,
     login,
+    loginWithGoogle,
+    handleGoogleCallback,
     logout,
   }
 
