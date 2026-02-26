@@ -167,12 +167,10 @@ export function useSpeech() {
     isListening,
     isPlaying,
     transcript,
-    isBrowserSupported: !!(sttRef.current && window.speechSynthesis),
     startListening,
     stopListening,
     speak,
     stopSpeaking,
-    clearTranscript,
-    setTranscript
+    clearTranscript
   }
 }

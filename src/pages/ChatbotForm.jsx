@@ -20,7 +20,7 @@ export const ChatbotForm = () => {
   const [isValidating, setIsValidating] = useState(false)
   const messagesEndRef = useRef(null)
   const { getForm, validateAnswer, submitAnswers } = useFormData()
-  const { isListening, transcript, startListening, stopListening, clearTranscript, setTranscript } = useSpeech()
+  const { isListening, transcript, startListening, stopListening, clearTranscript } = useSpeech()
 
   useEffect(() => {
     const loadForm = async () => {
@@ -158,12 +158,6 @@ export const ChatbotForm = () => {
       stopListening()
     } else {
       startListening()
-    }
-  }
-
-  const handleVoiceSubmit = () => {
-    if (transcript.trim()) {
-      handleAnswer(transcript)
     }
   }
 
