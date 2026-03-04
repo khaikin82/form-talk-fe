@@ -90,46 +90,25 @@ export const authService = {
     return `${API_BASE_URL}${API_ENDPOINTS.GOOGLE_LOGIN}`
   },
 
-  // Handle Google OAuth callback
-  handleGoogleCallback: async (queryParams) => {
-    const { code, state, error } = queryParams
-
-    if (error) {
-      throw new Error(`Google login error: ${error}`)
+  // Handle OAuth token from callback
+  setOAuthToken: (token) => {
+    if (token) {
+      localStorage.setItem("authToken", token)
     }
+  },
 
-    if (!code) {
-      throw new Error("No authorization code received from Google")
-    }
-
-    // The backend will handle the token exchange and user creation
-    // We receive the JWT token and user info from the callback endpoint
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.GOOGLE_CALLBACK}?code=${code}&state=${state}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+  // Decode JWT token to extract user info
+  decodeToken: (token) => {
+    try {
+      const parts = token.split(".")
+      if (parts.length !== 3) {
+        throw new Error("Invalid token format")
       }
-    )
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.error || data.message || "Google login failed")
+      const payload = JSON.parse(atob(parts[1]))
+      return payload
+    } catch (error) {
+      console.error("Failed to decode token:", error)
+      return null
     }
-
-    // Store token if returned
-    if (data.token) {
-      localStorage.setItem("authToken", data.token)
-    }
-
-    // Store user info
-    if (data.user) {
-      localStorage.setItem("user", JSON.stringify(data.user))
-    }
-
-    return data
   },
 }

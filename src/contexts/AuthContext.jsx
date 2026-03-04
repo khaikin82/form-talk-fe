@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react"
 import { authService } from "../services/authService"
+import { API_BASE_URL } from "../constants/apiConfig"
 import { AuthContext } from "./AuthContextDef"
 
 export { AuthContext }
@@ -87,21 +88,58 @@ export const AuthProvider = ({ children }) => {
     window.location.href = authService.getGoogleLoginUrl()
   }, [])
 
-  const handleGoogleCallback = useCallback((userData) => {
-    // This is called after OAuth callback is processed
-    // userData should contain { user, token }
-    if (userData.user && userData.token) {
-      setUser(userData.user)
-      setToken(userData.token)
-      setError(null)
-    }
-  }, [])
-
   const logout = useCallback(() => {
     authService.logout()
     setUser(null)
     setToken(null)
     setError(null)
+  }, [])
+
+  const handleOAuthCallback = useCallback(async (token) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      // Decode token to get basic user info
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      
+      // Try to fetch user info from API using the token
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      let userData = null
+      
+      if (response.ok) {
+        const data = await response.json()
+        userData = data.user || data
+      } else {
+        // If /auth/me doesn't exist, create user object from token payload
+        userData = {
+          id: payload.sub || payload.user_id,
+          username: payload.username,
+          email: payload.email,
+          firstName: payload.first_name,
+          lastName: payload.last_name,
+        }
+      }
+
+      // Save to localStorage and update state
+      localStorage.setItem("authToken", token)
+      localStorage.setItem("user", JSON.stringify(userData))
+      
+      setToken(token)
+      setUser(userData)
+    } catch (err) {
+      const errorMsg = "Failed to process OAuth callback"
+      setError(errorMsg)
+      console.error(err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   const value = {
@@ -113,8 +151,8 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     loginWithGoogle,
-    handleGoogleCallback,
     logout,
+    handleOAuthCallback,
   }
 
   return (
