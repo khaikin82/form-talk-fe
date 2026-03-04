@@ -59,7 +59,7 @@ const FormMode = ({ form, formId }) => {
     clearTranscript()
 
     setIsValidating(true)
-    const validation = await validateAnswer(currentQuestion, answerText)
+    const validation = await validateAnswer(currentQuestion, answerText, "chat")
     setIsValidating(false)
 
     if (!validation.isValid && validation.followUpQuestion) {

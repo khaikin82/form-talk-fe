@@ -50,11 +50,12 @@ export const useFormData = () => {
     }
   }, [])
 
-  const validateAnswer = useCallback(async (questionData, rawAnswer) => {
+  const validateAnswer = useCallback(async (questionData, rawAnswer, conversationMode = "chat") => {
     try {
       const result = await formService.validateRawAnswer(
         questionData,
-        rawAnswer
+        rawAnswer,
+        conversationMode
       )
       return result
     } catch (err) {

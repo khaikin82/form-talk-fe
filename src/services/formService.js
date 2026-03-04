@@ -112,7 +112,7 @@ export const formService = {
     return data
   },
 
-  validateRawAnswer: async (questionData, rawAnswer) => {
+  validateRawAnswer: async (questionData, rawAnswer, conversationMode = "chat") => {
     const response = await fetch(
       `${API_BASE_URL}${API_ENDPOINTS.VALIDATE_ANSWER}`,
       {
@@ -126,6 +126,7 @@ export const formService = {
           questionType: questionData.type,
           options: questionData.options || [],
           rawAnswer: rawAnswer,
+          conversationMode: conversationMode,
         }),
       }
     )

@@ -141,7 +141,7 @@ export const ConversationalChatbot = ({ formId }) => {
     clearTranscript()
 
     setIsValidating(true)
-    const validation = await validateAnswer(currentQuestion, answerText)
+    const validation = await validateAnswer(currentQuestion, answerText, "ai_conversation")
     setIsValidating(false)
 
     if (!validation.isValid && validation.followUpQuestion) {
